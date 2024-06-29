@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ระบบจองคิว</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>ระบบจองคิว</h1>
+
+  <h2>เพิ่มการจองใหม่</h2>
+  <form id="bookingForm">
+    <input type="text" id="name" placeholder="ชื่อ" required>
+    <input type="text" id="phoneNumber" placeholder="เบอร์โทรศัพท์" required>
+    <input type="date" id="date" required>
+    <input type="time" id="time" required>
+    <button type="submit">จอง</button>
+  </form>
+
+  <h2>รายการจองทั้งหมด</h2>
+  <div id="bookingsList"></div>
+
+  <script>
+    // เริ่มต้น LIFF
+    async function initializeLiff() {
+      await liff.init({ liffId: "1656793903-WxZAep7g" });
+      fetchBookings();
+    }
+
+    // จัดการการส่งฟอร์ม
+    document.getElementById('bookingForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const phoneNumber = document.getElementById('phoneNumber').value;
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+
+      const response = await fetch('https://script.google.com/macros/s/AKfycbxRksmztuHBxrcyCgm7raaXUFZjvcOZxCPhb49OCONMjU92L_drcxJ3a5V51FZ-BpUk/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: name, 
+          phoneNumber: phoneNumber, 
+          date: date, 
+          time: time 
+        })
+      });
+      if (response.ok) {
+        alert('จองสำเร็จ!');
+        fetchBookings(); // โหลดข้อมูลการจองใหม่
+      } else {
+        alert('การจองล้มเหลว!');
+      }
+    }
+
+    // ฟังก์ชันสำหรับดึงข้อมูลการจองทั้งหมด
+    async function fetchBookings() {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbxRksmztuHBxrcyCgm7raaXUFZjvcOZxCPhb49OCONMjU92L_drcxJ3a5V51FZ-BpUk/exec');
+      const bookings = await response.json();
+      const bookingsList = document.getElementById('bookingsList');
+      bookingsList.innerHTML = '';
+      bookings.forEach(booking => {
+        const bookingItem = document.createElement('div');
+        bookingItem.textContent = `ชื่อ: ${booking.name}, เบอร์โทรศัพท์: ${booking.phoneNumber}, วันที่: ${booking.date}, เวลา: ${booking.time}, สถานะ: ${booking.status}`;
+        bookingsList.appendChild(bookingItem);
+      });
+    }
+
+    initializeLiff();
+  </script>
+</body>
+</html>
